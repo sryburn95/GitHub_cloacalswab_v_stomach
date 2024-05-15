@@ -1,201 +1,57 @@
 ---
-title: "Chapter 1 NC fecal v stomach"
-author: "Savannah Ryburn and Eldridge Wisely"
-date: "2024-05-01"
+title: "Chapter 1_to.be.published"
+author: "Savannah"
+date: "2024-05-15"
 output: html_document
 ---
-
-Use Phyloseq to visualize NC_Sharks_Data
-```{r}
-#Load R Global Environment
-load("../../NC_Sequencing_Data/After_BerryCrust_obi3_lulu_metabaR.RData")
-#setwd("/Users/savannahryburn/Desktop/NC_Sequencing_Data")
-#load("../results_obi3-12-21-22/After_BerryCrust_obi3_lulu_metabaR.RData")
-#load("After_BerryCrust_obi3_lulu_metabaR.RData")
-
-load("../../NC_Sequencing_Data/NC_Sharks_ready_for_phyloseq.RData")
-#load("NC_Sharks_ready_for_phyloseq.RData")
-
-samples.df<-read.csv("../../NC_Sequencing_Data/newfilewithpairedcolumn.csv",row.names = "X")
-```
 
 Starting Phlyoseq
 ```{r}
 library(phyloseq)
 library(ggplot2)
-
-NC_Sharks.ps<- phyloseq(otu_table(clean.otu.mat, taxa_are_rows = TRUE), 
-                        sample_data(samples.df), 
-                        tax_table(clean.taxa.mat))
-
-NC_Sharks.ps
-sample_names(NC_Sharks.ps)
-rank_names(NC_Sharks.ps)
-sample_variables(NC_Sharks.ps)
-
-#write.csv(clean.otu.df, "combined_NC_Sharks_ready_for_phyloseq_otus_no_empty_pcrs.csv")
-#write.csv(samples.df, "combined_NC_Sharks_ready_for_phyloseq_samples.csv")
-#write.csv(taxa.df, "combined_NC_Sharks_ready_for_phyloseq_taxa.csv")
-
-NC_Sharks.ps
-
-sample_variables(NC_Sharks.ps)
-```
-
-```{r}
-# Transform data to proportions as appropriate for Bray-Curtis distances (changing read counts to RRA, in the prop file)
-
-NC_Sharks.ps.prop <- transform_sample_counts(NC_Sharks.ps, function(otu) otu/sum(otu))
-ord.nmds.bray <- ordinate(NC_Sharks.ps.prop, method="NMDS", distance="bray")
-```
-
-```{r}
-# Sort prey into the 20 most common OTUs
-
-top20 <- names(sort(taxa_sums(NC_Sharks.ps), decreasing=TRUE))[0:20]
-ps.top20 <- transform_sample_counts(NC_Sharks.ps, function(OTU) OTU/sum(OTU))
-ps.top20 <- prune_taxa(top20, ps.top20)
-```
-
-```{r}
-# Normalize number of reads in each sample using median sequencing depth.
-
-total = median(sample_sums(NC_Sharks.ps))
-standf = function(x, t=total) round(t * (x / sum(x)))
-NC_Sharks.ps.med.norm = transform_sample_counts(NC_Sharks.ps, standf)
-```
-
-```{r}
-# Merge samples by donor species (i.e., shark species)
-
-NC_Shark_donor_merge.ps <- merge_samples(NC_Sharks.ps, "Species..scientific.name.")
-```
-
-```{r}
-# Merge motus by prey species
-
-NC_Shark_prey_species_merge.ps <- tax_glom(NC_Sharks.ps, taxrank = "species", NArm = FALSE)
-
-NC_Shark_prey_species_merge.ps
-sample_variables(NC_Shark_prey_species_merge.ps)
-rank_names(NC_Shark_prey_species_merge.ps)
-
-# Export read table with species or genus (if only genus available) instead of motu/asv now that they've been properly merged
-taxtbl <- as.data.frame(tax_table(NC_Shark_prey_species_merge.ps))
-otutbl<-as.data.frame(otu_table(NC_Shark_prey_species_merge.ps))
-sampletbl<-as.data.frame(sample_data(NC_Shark_prey_species_merge.ps))
-
-View(NC_Shark_prey_species_merge.ps)
-```
-
-```{r}
 library(tibble)
 library(dplyr)
+library(tidyverse)
+library(vegan)
+library(tidyr)
+library(car)
+library(rstatix)
 
-otutbl$species <-
-  taxtbl$species[match(rownames(otutbl),rownames(taxtbl))]
+#install.packages("ggraph") # for taxatree_plots()
+#install.packages("DT") # for tax_fix_interactive()
+#install.packages("corncob") # for example datasets and beta binomial models
+#if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+#BiocManager::install(c("phyloseq", "microbiome", "ComplexHeatmap"), update = FALSE)
 
-otutbl$genus <-
-  taxtbl$genus[match(rownames(otutbl),rownames(taxtbl))]
+#install.packages(
+#  "microViz",
+#  repos = c(davidbarnett = "https://david-barnett.r-universe.dev", getOption("repos"))
+#)
+library(microViz)
+library(ggraph)
+library(DT)
+library(corncob)
 
-df<-otutbl %>% relocate(genus)
-df<-df %>% relocate(species, .after = genus)
+#install.packages("remotes")
+#remotes::install_github("vmikk/metagMisc")
+library(metagMisc)
 
-df1<- as.data.frame(t(df))
-
-df1<- rownames_to_column(df1, var="sample")
-samples.df.1<-rownames_to_column(samples.df, var="sample")
-df2<- left_join(df1, samples.df.1, by ="sample")
-
-colnames(df2)
-
-#Its giving me an error for all of the ones that end in .x (so get rid of these)
-df3<- df2 %>% select(-"type",-"plate_no",-"plate_col.x",-"plate_row",-"tag_fwd",-"tag_rev",-"primer_fwd.x",-"primer_rev.x",-"project",-"control_type",-"nb_reads.x",-"nb_motus.x",-"low_contamination_level.x",-"seqdepth_ok.x",-"nb_reads_postmetabaR.x",-"nb_motus_postmetabaR.x",-"date_collected.x",-"species.x",-"plate_col.y",-"primer_fwd.y",-"primer_rev.y",-"nb_reads.y",-"nb_motus.y",-"low_contamination_level.y",-"seqdepth_ok.y",-"nb_reads_postmetabaR.y",-"nb_motus_postmetabaR.y",-"date_collected.y",-"species.y")
-
-colnames(df3)
-
-#write.csv(df3, "NC_Sharks_samples_by_species_combined_table.csv")
-```
-
-```{r}
-# Make similar table as above but with order, family, genus, and species
-
-otutbl$species <-
-  taxtbl$species[match(rownames(otutbl),rownames(taxtbl))]
-
-otutbl$genus <-
-  taxtbl$genus[match(rownames(otutbl),rownames(taxtbl))]
-
-otutbl$family <-
-  taxtbl$family[match(rownames(otutbl),rownames(taxtbl))]
-
-otutbl$order <-
-  taxtbl$order[match(rownames(otutbl),rownames(taxtbl))]
-
-df<-otutbl %>% relocate(order)
-df<-df %>% relocate(family, .after = order)
-df<-df %>% relocate(genus, .after = family)
-df<-df %>% relocate(species, .after = genus)
-
-df1<- as.data.frame(t(df))
-
-df1<- rownames_to_column(df1, var="sample")
-samples.df.1<-rownames_to_column(samples.df, var="sample")
-df2<- left_join(df1, samples.df.1, by ="sample")
-
-colnames(df2)
-
-#Its giving me an error for all of the ones that end in .x (so get rid of these)
-df3<- df2 %>% select(-"type",-"plate_no",-"plate_col.x",-"plate_row",-"tag_fwd",-"tag_rev",-"primer_fwd.x",-"primer_rev.x",-"project",-"control_type",-"nb_reads.x",-"nb_motus.x",-"low_contamination_level.x",-"seqdepth_ok.x",-"nb_reads_postmetabaR.x",-"nb_motus_postmetabaR.x",-"date_collected.x",-"species.x",-"plate_col.y",-"primer_fwd.y",-"primer_rev.y",-"nb_reads.y",-"nb_motus.y",-"low_contamination_level.y",-"seqdepth_ok.y",-"nb_reads_postmetabaR.y",-"nb_motus_postmetabaR.y",-"date_collected.y",-"species.y")
-
-colnames(df3)
-
-#flip the rows and columns
-df4 <- t(df3)
-
-#write.csv(df4, "NC_Sharks_samples_by_species_combined_table_all.csv")
-```
-
-```{r}
-# Normalize number of reads in each sample using median sequencing depth.
-
-total = median(sample_sums(NC_Shark_prey_species_merge.ps))
-standf = function(x, t=total) round(t * (x / sum(x)))
-NC_Sharks.ps.species.med.norm = transform_sample_counts(NC_Shark_prey_species_merge.ps, standf)
-
-View(NC_Shark_prey_species_merge.ps)
-View(NC_Sharks.ps.species.med.norm)
-
-NC_Sharks.ps.species.med.norm
-```
-
-```{r}
-
-
-# Make a subset with only paired fecals/stomachs
-
-NC_Shark_prey_species_merge_paired.ps<-subset_samples(NC_Shark_prey_species_merge.ps,Paired=="Yes")
+#Import Phyloseq object----
+NC_Shark_prey_species_merge_paired.ps<-readRDS(file="../paired_phyloseq_data.rds")
 
 NC_Shark_prey_species_merge_paired.ps
-
-saveRDS(NC_Shark_prey_species_merge_paired.ps, file="../paired_phyloseq_data.rds")
-
-
-
-
-#plot_richness(NC_Shark_prey_species_merge_paired.ps, x="Species..scientific.name.","material", measures=c("Shannon", "Simpson"), color="Species..scientific.name.")
 ```
 
 ```{r}
-top20species <- names(sort(taxa_sums(NC_Shark_prey_species_merge.ps), decreasing=TRUE))[0:20]
-ps.top20species <- transform_sample_counts(NC_Shark_prey_species_merge.ps, function(OTU) OTU/sum(OTU))
-ps.top20species <- prune_taxa(top20species, ps.top20species)
-
+# top20species <- names(sort(taxa_sums(NC_Shark_prey_species_merge_paired.ps), decreasing=TRUE))[0:20]
+# ps.top20species <- transform_sample_counts(NC_Shark_prey_species_merge_paired.ps, function(OTU) OTU/sum(OTU))
+# ps.top20species <- prune_taxa(top20species, ps.top20species)
+# 
 #Normalize number of reads in each sample using median sequencing depth.
-total = median(sample_sums(NC_Shark_prey_species_merge.ps))
+total = median(sample_sums(NC_Shark_prey_species_merge_paired.ps))
 standf = function(x, t=total) round(t * (x / sum(x)))
-NC_Sharks.ps.species.med.norm = transform_sample_counts(NC_Shark_prey_species_merge.ps, standf)
-
+NC_Sharks.ps.species.med.norm = transform_sample_counts(NC_Shark_prey_species_merge_paired.ps, standf)
+ 
 NC_Sharks.ps.species.med.norm
 ```
 
@@ -203,7 +59,7 @@ Sorensen Similarity
 ```{r}
 #Make Sorensen Similarity violin plot from paired fecal/stomach samples normalized to median sequencing depth merged by prey species.
 
-NC_Shark_prey_species_merge_med.norm.paired.ps<-subset_samples(NC_Sharks.ps.species.med.norm,Paired=="Yes")
+NC_Shark_prey_species_merge_med.norm.paired.ps<-NC_Sharks.ps.species.med.norm
 
 View(NC_Sharks.ps.species.med.norm)
 
@@ -211,7 +67,7 @@ NC_Shark_prey_species_merge_med.norm.paired.ps
 View(sample_data(NC_Shark_prey_species_merge_med.norm.paired.ps))
 
 #merge motus by prey species with no NAs
-NC_Shark_prey_species_merge1.ps <- tax_glom(NC_Sharks.ps, taxrank = "species", NArm = TRUE)
+NC_Shark_prey_species_merge1.ps <- tax_glom(NC_Shark_prey_species_merge_paired.ps, taxrank = "species", NArm = TRUE)
 plot_bar(NC_Shark_prey_species_merge1.ps, fill = "family") + 
   geom_bar(aes(color=family, fill=family), stat="identity", position="stack")
 
@@ -229,7 +85,6 @@ NC_Sharks.ps.species1.med.norm.paired.ps<-subset_samples(NC_Sharks.ps.species1.m
 NC_Sharks.ps.species1.med.norm.paired.ps
 
 #extract matching fecal and stomach samples by Shark ID
-library(tidyverse)
 
 matched_fs_and_sts<- sample_data(NC_Sharks.ps.species1.med.norm.paired.ps)[,c("sample_id","material")]
 
@@ -285,12 +140,11 @@ print(dissimilarity_plot)
 #Do the same Sørensen distance matrix and scatterplot with genus tax_glom
 
 #merge motus by prey genus
-NC_Shark_prey_genus_merge.ps <- tax_glom(NC_Sharks.ps, taxrank = "genus", NArm = FALSE)
+NC_Shark_prey_genus_merge.ps <- tax_glom(NC_Shark_prey_species_merge_paired.ps, taxrank = "genus", NArm = FALSE)
 plot_bar(NC_Shark_prey_genus_merge.ps, fill = "genus") + 
   geom_bar(aes(color=genus, fill=genus), stat="identity", position="stack")
 
-NC_Sharks.ps
-NC_Shark_prey_species_merge.ps
+NC_Shark_prey_species_merge_paired.ps
 NC_Shark_prey_genus_merge.ps
 
 NC_Shark_prey_genus_merge.ps
@@ -305,7 +159,7 @@ NC_Sharks.ps.genus.med.norm = transform_sample_counts(NC_Shark_prey_genus_merge.
 NC_Sharks.ps.genus.med.norm
 
 #Get just the fecal and stomach paired samples
-NC_Shark_prey_genus_merge_med.norm.paired.ps<-subset_samples(NC_Sharks.ps.genus.med.norm,Paired=="Yes")
+NC_Shark_prey_genus_merge_med.norm.paired.ps<-NC_Sharks.ps.genus.med.norm
 NC_Shark_prey_genus_merge_med.norm.paired.ps
 
 #re-do Sorensen distances for the genus phyloseq object
@@ -368,12 +222,11 @@ print(genus_dissimilarity_plot)
 #Do the same Sørensen distance matrix and scatterplot with family tax_glom
 
 #merge motus by prey family
-NC_Shark_prey_family_merge.ps <- tax_glom(NC_Sharks.ps, taxrank = "family", NArm = FALSE)
+NC_Shark_prey_family_merge.ps <- tax_glom(NC_Shark_prey_species_merge_paired.ps, taxrank = "family", NArm = FALSE)
 plot_bar(NC_Shark_prey_family_merge.ps, fill = "family") + 
   geom_bar(aes(color=family, fill=family), stat="identity", position="stack")
 
-NC_Sharks.ps
-NC_Shark_prey_species_merge.ps
+NC_Shark_prey_species_merge_paired.ps
 NC_Shark_prey_genus_merge.ps
 NC_Shark_prey_family_merge.ps
 
@@ -389,7 +242,7 @@ NC_Sharks.ps.family.med.norm = transform_sample_counts(NC_Shark_prey_family_merg
 NC_Sharks.ps.family.med.norm
 
 #Get just the fecal and stomach paired samples
-NC_Shark_prey_family_merge_med.norm.paired.ps<-subset_samples(NC_Sharks.ps.family.med.norm,Paired=="Yes")
+NC_Shark_prey_family_merge_med.norm.paired.ps<-NC_Sharks.ps.family.med.norm
 NC_Shark_prey_family_merge_med.norm.paired.ps
 
 #re-do Sorensen distances for the family phyloseq object
@@ -452,12 +305,11 @@ print(family_dissimilarity_plot)
 #Do the same Sørensen distance matrix and scatterplot with order tax_glom
 
 #merge motus by prey order
-NC_Shark_prey_order_merge.ps <- tax_glom(NC_Sharks.ps, taxrank = "order", NArm = FALSE)
+NC_Shark_prey_order_merge.ps <- tax_glom(NC_Shark_prey_species_merge_paired.ps, taxrank = "order", NArm = FALSE)
 plot_bar(NC_Shark_prey_order_merge.ps, fill = "order") + 
   geom_bar(aes(color=order, fill=order), stat="identity", position="stack")
 
-NC_Sharks.ps
-NC_Shark_prey_species_merge.ps
+NC_Shark_prey_species_merge_paired.ps
 NC_Shark_prey_genus_merge.ps
 NC_Shark_prey_family_merge.ps
 NC_Shark_prey_order_merge.ps
@@ -474,7 +326,7 @@ NC_Sharks.ps.order.med.norm = transform_sample_counts(NC_Shark_prey_order_merge.
 NC_Sharks.ps.order.med.norm
 
 #Get just the fecal and stomach paired samples
-NC_Shark_prey_order_merge_med.norm.paired.ps<-subset_samples(NC_Sharks.ps.order.med.norm,Paired=="Yes")
+NC_Shark_prey_order_merge_med.norm.paired.ps<-NC_Sharks.ps.order.med.norm
 NC_Shark_prey_order_merge_med.norm.paired.ps
 #re-do Sorensen distances for the order phyloseq object
 
@@ -532,12 +384,11 @@ print(order_dissimilarity_plot)
 #Do the same Sørensen distance matrix and scatterplot with species tax_glom
 
 #merge motus by prey family
-NC_Shark_prey_species_merge.ps <- tax_glom(NC_Sharks.ps, taxrank = "species", NArm = FALSE)
+NC_Shark_prey_species_merge.ps <- tax_glom(NC_Shark_prey_species_merge_paired.ps, taxrank = "species", NArm = FALSE)
 plot_bar(NC_Shark_prey_species_merge.ps, fill = "species") + 
   geom_bar(aes(color=species, fill=species), stat="identity", position="stack")
 
-NC_Sharks.ps
-NC_Shark_prey_species_merge.ps
+NC_Shark_prey_species_merge_paired.ps
 NC_Shark_prey_genus_merge.ps
 NC_Shark_prey_family_merge.ps
 
@@ -553,7 +404,7 @@ NC_Sharks.ps.species.med.norm = transform_sample_counts(NC_Shark_prey_species_me
 NC_Sharks.ps.species.med.norm
 
 #Get just the fecal and stomach paired samples
-NC_Shark_prey_species_merge_med.norm.paired.ps<-subset_samples(NC_Sharks.ps.species.med.norm,Paired=="Yes")
+NC_Shark_prey_species_merge_med.norm.paired.ps<-NC_Sharks.ps.species.med.norm
 NC_Shark_prey_species_merge_med.norm.paired.ps
 #re-do Sorensen distances for the species phyloseq object
 
@@ -1043,7 +894,7 @@ ps.top20species <- transform_sample_counts(NC_Shark_prey_species_merge.ps, funct
 ps.top20species <- prune_taxa(top20species, ps.top20species)
 
 #merge motus by prey species with no NAs
-NC_Shark_prey_species_merge1.ps <- tax_glom(NC_Sharks.ps, taxrank = "species", NArm = TRUE)
+NC_Shark_prey_species_merge1.ps <- tax_glom(NC_Shark_prey_species_merge_paired.ps, taxrank = "species", NArm = TRUE)
 
 NC_Shark_prey_species_merge1.ps
 sample_variables(NC_Shark_prey_species_merge1.ps)
@@ -1055,80 +906,20 @@ NC_Shark_prey_species_merge.ps.prop <- transform_sample_counts(NC_Shark_prey_spe
 # Make figure comparing fecal v stomach for individual sharks (genus) with only paired fecals/stomachs
 
 #Make a subset with only paired fecals/stomachs
-NC_Shark_prey_species_merge_paired.ps<-subset_samples(NC_Shark_prey_species_merge.ps,Paired=="Yes")
+NC_Shark_prey_species_merge_paired.ps<-NC_Shark_prey_species_merge.ps
 
 NC_Shark_prey_species_merge_paired.ps
 
 NC_Shark_prey_species_merge_paired.ps.prop <- transform_sample_counts(NC_Shark_prey_species_merge_paired.ps, function(species) species/sum(species))
-
-# Plot paired samples read proportions by shark species prey genus
-plot_bar(NC_Shark_prey_species_merge_paired.ps.prop,x="sample_id", fill="genus") + 
-  facet_grid(~material~Species..scientific.name., scales="free") +
-  geom_bar(aes(color=genus, fill=genus), stat="identity", position="stack")
-
-# Stacked bar plot that compares fecal vs stomach by individual (genus)
-plot_bar(NC_Shark_prey_species_merge_paired.ps.prop,x="sample_id", fill="genus") + 
-  facet_grid(~material~Species..scientific.name., scales="free", space = "free") +
-  geom_bar(aes(color=genus, fill=genus), stat="identity", position = position_stack()) +
-  theme_classic() +
-  theme(text = element_text(size =11)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Stacked bar plot that compares fecal vs stomach by species of shark (genus) 
-  # This is for only sharks that have a paired sample
-plot_bar(NC_Shark_prey_species_merge_paired.ps.prop,x="Species..scientific.name.", fill="genus") + 
-  facet_grid(~material, scales="free") +
-  geom_bar(aes(color=genus, fill=genus), stat="identity", position="stack") +
-    theme_classic() +
-  theme(text = element_text(size =11)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-# Scatter plot that compares species diversity of fecal vs stomach by species of shark 
-  # This is for only sharks that have a paired sample
-plot_richness(NC_Shark_prey_species_merge_paired.ps.prop, x="Species..scientific.name.","material", measures=c("Shannon", "Simpson"), color="Species..scientific.name.")+
-   theme_classic() +
-  theme(text = element_text(size =11)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-plot_richness(NC_Shark_prey_species_merge_paired.ps.prop, x="Species..scientific.name.","material", measures=c("Shannon", "Simpson"), color="Species..scientific.name.") +
- facet_grid(~material~Species..scientific.name., scales="free", space = "free") + theme_classic() +
-  theme(text = element_text(size =11)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-plot_richness(NC_Shark_prey_species_merge_paired.ps.prop, x="material", measures=c("Shannon", "Simpson"), color="Species..scientific.name.") +
- facet_grid(~material, scales="free", space = "free") + theme_classic() +
-  theme(text = element_text(size =11)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-plot_richness(NC_Shark_prey_species_merge_paired.ps.prop, x="material", measures=c("Shannon", "Simpson")) +
- facet_grid(~material, scales="free", space = "free") + theme_classic() +
-  theme(text = element_text(size =11)) + geom_boxplot()
 ```
 
 ```{r}
 #Following the microviz tutorial https://david-barnett.github.io/microViz/index.html
-#awesome stuff!
-
-#if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-#BiocManager::install(c("phyloseq", "microbiome", "ComplexHeatmap"), update = FALSE)
-
-#install.packages(
-#  "microViz",
-#  repos = c(davidbarnett = "https://david-barnett.r-universe.dev", getOption("repos"))
-#)
-
-#install.packages("ggraph") # for taxatree_plots()
-#install.packages("DT") # for tax_fix_interactive()
-#install.packages("corncob") # for example datasets and beta binomial models
-library(microViz)
-library(ggraph)
-library(DT)
-library(corncob)
 
 # Only the top 20 species from the paired samples
 
 #Make a subset with only paired fecals/stomachs
-NC_Shark_prey_species_merge.ps_paired<-subset_samples(NC_Shark_prey_species_merge.ps,Paired=="Yes")
+NC_Shark_prey_species_merge.ps_paired<-NC_Shark_prey_species_merge.ps
 NC_Shark_prey_species_merge.ps_paired
 NC_Shark_prey_species_merge.ps_paired <- transform_sample_counts(NC_Shark_prey_species_merge.ps_paired, function(species) species/sum(species))
 
@@ -1148,37 +939,6 @@ top20species_paired <- names(sort(taxa_sums(NC_Shark_prey_species_merge.ps_paire
 #RRA (OTUs = reads)
 NC_Shark_prey_species_merge.ps_paired.1_top20species <- transform_sample_counts(NC_Shark_prey_species_merge.ps_paired.1, function(OTU) OTU/sum(OTU))
 NC_Shark_prey_species_merge.ps_paired.1_top20species <- prune_taxa(top20species_paired, NC_Shark_prey_species_merge.ps_paired.1_top20species)
-
-plot_bar(NC_Shark_prey_species_merge.ps_paired.1_top20species, x="Species..scientific.name.",fill="species")+ 
-  geom_bar(aes(color=species, fill=species), stat="identity", position="stack")
-```
-
-```{r}
-# Stacked bar plot that compares fecal vs stomach by species of shark (species) 
-  # This is for only sharks that have a paired sample
-plot_bar(NC_Shark_prey_species_merge.ps_paired.1_top20species,x="Species..scientific.name.", fill="species") + 
-  facet_grid(~material, scales="free") +
-  geom_bar(aes(color=species, fill=species), stat="identity", position="stack") +
-    theme_classic() +
-  theme(text = element_text(size =11)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
-  scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
-  "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
-  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1"))
-
-# Stacked bar plot that compares fecal vs stomach by species of shark (species) different organization
-  # This is for only sharks that have a paired sample
-plot_bar(NC_Shark_prey_species_merge.ps_paired.1_top20species,x="Species..scientific.name.", fill="species") + 
-  facet_grid(~material~Species..scientific.name., scales="free", space = "free") +
-  geom_bar(aes(color=species, fill=species), stat="identity", position = position_stack()) +
-    theme_classic() +
-  theme(text = element_text(size =11)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
-  scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
-  "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
-  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1"))
 ```
 
 ```{r}
@@ -1190,22 +950,18 @@ plot_bar(NC_Shark_prey_species_merge.ps_paired.1_top20species,x="sample_id", fil
   theme_classic() +
   theme(text = element_text(size =11)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  ylab("Normalized relative read abundance") +
   scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
   "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
   scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1"))
+  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) 
 ```
 
 ```{r}
 #Now break this up so its by shark species and they are next to each other
 
-#install.packages("remotes")
-#remotes::install_github("vmikk/metagMisc")
-library(metagMisc)
-
 #Convert to presence absence:
 NC_Shark_prey_species_merge.ps_paired.1.PA <- phyloseq_standardize_otu_abundance(NC_Shark_prey_species_merge.ps_paired.1, method = "pa")
-View(NC_Shark_prey_species_merge.ps_paired.1.PA)
 
 #Top 20
 top20occ = names(sort(taxa_sums(NC_Shark_prey_species_merge.ps_paired.1.PA), decreasing = TRUE)[1:20])
@@ -1219,11 +975,8 @@ NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose<-subset_sampl
 otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose)))
 otu_df$otu<-rownames(otu_df)
 
-View(otu_df)
-
 otu_df_long<-otu_df%>%
   pivot_longer(cols = -otu,names_to = "sample",values_to = "presence")
-View(otu_df_long)
 
 otu_df_long$sample <-gsub(pattern = ".",
                           "-",
@@ -1233,10 +986,8 @@ otu_df_long$sample <-gsub(pattern = ".",
 sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose)))
 library(tidyverse)
 sample_df<-rownames_to_column(sample_df, var = "sample")
-View(sample_df)
 sample_material_key<-sample_df%>%
   select(sample,material)
-View(sample_material_key)
 
 taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose)))
 taxa_df<-rownames_to_column(taxa_df,var="otu")
@@ -1246,28 +997,25 @@ otu_species_key<-taxa_df%>%
 otu_df_long<-otu_df_long%>%
   left_join(sample_material_key)%>%
   left_join(otu_species_key)
-View(otu_df_long)
+
 #group by different taxonomic levels (shark species)
 
 merge_material_otu_counts<-otu_df_long%>%
   group_by(material,species)%>%
   summarise(total_count=sum(presence))%>%
   ungroup()
-View(merge_material_otu_counts)
 
 merge_material_counts<-merge_material_otu_counts%>%
   group_by(material)%>%
   mutate(total_material=sum(total_count))%>%
   ungroup()%>%
-  mutate(rel_prct=total_count/total_material)
-View(merge_material_counts)
+  mutate(rel_prct=(total_count/total_material)*100)
 
 #plot 
 ggplot(merge_material_counts,fill="species")+
   geom_bar(aes(x=material, y=rel_prct, color=species, fill=species), color="black",stat="identity", position="stack")+
-  ylab("Relative Percent of Occurrence by Site")
-
-
+  ylab("Relative Percent of Occurrence by material type") + 
+  xlab("Atlantic sharpnose")
 
 
 
@@ -1415,31 +1163,12 @@ grid.arrange(NC_Shark_prey_species_merge.ps_paired.1_top20species.Blacktip_plot,
 #NMDS plot comparing similarity between fecal and stomach samples
 
 #only include paired samples
-#NC_Shark_prey_species_merge.ps_paired<-NC_Shark_prey_species_merge.ps (to rename when I make the cleaned file to publish)
-NC_Shark_prey_species_merge.ps_paired<-subset_samples(NC_Shark_prey_species_merge.ps, Paired=="Yes")
+NC_Shark_prey_species_merge.ps_paired<-NC_Shark_prey_species_merge.ps
 
 # play with ordinations interactively
 pseq_paired <- NC_Shark_prey_species_merge.ps_paired %>%
   phyloseq_validate()
 
-#genus (without circles)
-pseq_paired %>%
-  tax_transform(rank = "genus", trans = "compositional") %>%
-  dist_calc(dist = "jsd") %>%
-  ord_calc(method = "NMDS") %>% 
-  ord_plot(
-    axes = c(1, 2),
-    colour = "Species..scientific.name.",
-    fill = "Species..scientific.name.",
-    shape = "material",
-    alpha = 0.5,
-    size = 2
-  ) +
-  geom_line(aes(x = NMDS1, y = NMDS2, group = sample_id, colour = Species..scientific.name.)) +
-  theme(
-    panel.grid = element_blank(),
-    panel.grid.major = element_blank()
-  )
 
 #genus (with circles) - jensen shannon compositional distance (compositional tranformation on the read abundances then made an nmds of the jensen shannon distances between sample types and shark species)
 pseq_paired %>%
@@ -1466,137 +1195,20 @@ pseq_paired %>%
 
 ```{r}
 # Statistics for NMDS plot (prey at genus level)
-
-#Calculate distance matrix
-NMDS_distances2 <- pseq_paired %>% tax_transform(rank = "genus", trans = "compositional") %>%
-  dist_calc(dist = "jsd")
-NMDS_distances2
-
-#PERMANOVA
-library(vegan)
-library(devtools)
-#install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis")
-library(pairwiseAdonis)
-
-View(NC_Shark_prey_species_merge.ps_paired)
-
-ncol(pseq_paired@sam_data)
-
-#Could be weird that we are mixing jsd and bray
-NMDS_distances2@info$ord_info
-pseq_paired@sam_data$material
-mat1 <- as.matrix(pseq_paired@otu_table@.Data)
-mat1 <- sqrt(mat1)
-mat1 <- t(mat1)
-dist1 <- vegan::vegdist(mat1, method = "bray")
-
-mat1[is.na(mat1)] <- 0
-adonis
-
-set.seed(15)
-mtest <- adonis2(mat1 ~ as.factor(pseq_paired@sam_data$material), permutations = 999, method = "bray")
-summary(mtest)
-mtest
-
-set.seed(15)
-mtest2 <- adonis2(mat1 ~ as.factor(pseq_paired@sam_data$Species..scientific.name.), permutations = 999, method = "bray")
-summary(mtest2)
-mtest2
-
-set.seed(15)
-mtest3 <- pairwise.adonis(mat1, as.factor(pseq_paired@sam_data$Species..scientific.name.))
-summary(mtest3)
-mtest3
-View(mtest3)
-
-
-
-##Redo permanova with Eillie's code
 jsd_dist_matrix <- phyloseq::distance(pseq_paired, method ="jsd")
 set.seed(200)
 vegan::adonis2(jsd_dist_matrix ~ phyloseq::sample_data(pseq_paired)$material*pseq_paired@sam_data$Species..scientific.name.)
 
 set.seed(200)
 pairwise.adonis(jsd_dist_matrix, phyloseq::sample_data(pseq_paired)$Species..scientific.name.)
-
-
-```
-
-```{r}
-#NMDS plots comparing similarity between fecal and stomach samples when prey is categorized at various different levels
-
-#family
-pseq_paired %>%
-  tax_transform(rank = "family", trans = "compositional") %>%
-  dist_calc(dist = "jsd") %>%
-  ord_calc(method = "NMDS") %>% 
-  ord_plot(
-    axes = c(1, 2),
-    colour = "Species..scientific.name.",
-    fill = "Species..scientific.name.",
-    shape = "material",
-    alpha = 0.5,
-    size = 2
-  ) +
-  geom_line(aes(x = NMDS1, y = NMDS2, group = sample_id, colour = Species..scientific.name.)) +
-  theme(
-    panel.grid = element_blank(),
-    panel.grid.major = element_blank()
-  )
-
-#order
-pseq_paired %>%
-  tax_fix() %>%
-  tax_transform(rank = "order", trans = "compositional") %>%
-  dist_calc(dist = "jsd") %>%
-  ord_calc(method = "NMDS") %>% 
-  ord_plot(
-    axes = c(1, 2),
-    colour = "Species..scientific.name.",
-    fill = "Species..scientific.name.",
-    shape = "material",
-    alpha = 0.5,
-    size = 2
-  ) +
-  geom_line(aes(x = NMDS1, y = NMDS2, group = sample_id, colour = Species..scientific.name.)) +
-  theme(
-    panel.grid = element_blank(),
-    panel.grid.major = element_blank()
-  )
-
-#class
-pseq_paired %>%
-  tax_transform(rank = "class", trans = "compositional") %>%
-  dist_calc(dist = "jsd") %>%
-  ord_calc(method = "NMDS") %>% 
-  ord_plot(
-    axes = c(1, 2),
-    colour = "Species..scientific.name.",
-    fill = "Species..scientific.name.",
-    shape = "material",
-    alpha = 0.5,
-    size = 2
-  ) +
-  geom_line(aes(x = NMDS1, y = NMDS2, group = sample_id, colour = Species..scientific.name.)) +
-  theme(
-    panel.grid = element_blank(),
-    panel.grid.major = element_blank()
-  )
 ```
 
 Rarefaction Curves
 ```{r}
-#only paired samples included
-
-library(phyloseq)
-library(vegan)
-library(ggplot2)
-library(tidyr)
-
 #(fecal vs stomach, Bonnetheads)
 
 ######Fecal######
-Rarefaction_Bonnethead_Fecal <- read.csv("ASV_Bonnethead_Fecal.csv")
+Rarefaction_Bonnethead_Fecal <- read.csv("Data/ASV_Bonnethead_Fecal.csv")
 
 View(Rarefaction_Bonnethead_Fecal)
 
@@ -1612,7 +1224,7 @@ attach(Rarefaction_Bonnethead_Fecal_Reverse)
 names(Rarefaction_Bonnethead_Fecal_Reverse)
 
 ######Stomach######
-Rarefaction_Bonnethead_Stomach <- read.csv("ASV_Bonnethead_Stomach.csv")
+Rarefaction_Bonnethead_Stomach <- read.csv("Data/ASV_Bonnethead_Stomach.csv")
 
 View(Rarefaction_Bonnethead_Stomach)
 
@@ -1642,7 +1254,7 @@ lines(sp2_Bonnethead,col="darkgreen", ci.type="poly", ci.col=(rgb(0,1,0, alpha=0
 #(fecal vs stomach, Blacktip)
 
 ######Fecal######
-Rarefaction_Blacktip_Fecal <- read.csv("ASV_Blacktip_Fecal.csv")
+Rarefaction_Blacktip_Fecal <- read.csv("Data/ASV_Blacktip_Fecal.csv")
 
 View(Rarefaction_Blacktip_Fecal)
 
@@ -1658,7 +1270,7 @@ attach(Rarefaction_Blacktip_Fecal_Reverse)
 names(Rarefaction_Blacktip_Fecal_Reverse)
 
 ######Stomach######
-Rarefaction_Blacktip_Stomach <- read.csv("ASV_Blacktip_Stomach.csv")
+Rarefaction_Blacktip_Stomach <- read.csv("Data/ASV_Blacktip_Stomach.csv")
 
 View(Rarefaction_Blacktip_Stomach)
 
@@ -1688,7 +1300,7 @@ lines(sp2_Blacktip,col="darkgreen", ci.type="poly", ci.col=(rgb(0,1,0, alpha=0.3
 #(fecal vs stomach, Blacknose)
 
 ######Fecal######
-Rarefaction_Blacknose_Fecal <- read.csv("ASV_Blacknose_Fecal.csv")
+Rarefaction_Blacknose_Fecal <- read.csv("Data/ASV_Blacknose_Fecal.csv")
 
 View(Rarefaction_Blacknose_Fecal)
 
@@ -1704,7 +1316,7 @@ attach(Rarefaction_Blacknose_Fecal_Reverse)
 names(Rarefaction_Blacknose_Fecal_Reverse)
 
 ######Stomach######
-Rarefaction_Blacknose_Stomach <- read.csv("ASV_Blacknose_Stomach.csv")
+Rarefaction_Blacknose_Stomach <- read.csv("Data/ASV_Blacknose_Stomach.csv")
 
 View(Rarefaction_Blacknose_Stomach)
 
@@ -1734,7 +1346,7 @@ lines(sp2_Blacknose,col="darkgreen", ci.type="poly", ci.col=(rgb(0,1,0, alpha=0.
 #(fecal vs stomach, AtlanticSharpnose)
 
 ######Fecal######
-Rarefaction_AtlanticSharpnose_Fecal <- read.csv("ASV_AtlanticSharpnose_Fecal.csv")
+Rarefaction_AtlanticSharpnose_Fecal <- read.csv("Data/ASV_AtlanticSharpnose_Fecal.csv")
 
 View(Rarefaction_AtlanticSharpnose_Fecal)
 
@@ -1750,7 +1362,7 @@ attach(Rarefaction_AtlanticSharpnose_Fecal_Reverse)
 names(Rarefaction_AtlanticSharpnose_Fecal_Reverse)
 
 ######Stomach######
-Rarefaction_AtlanticSharpnose_Stomach <- read.csv("ASV_AtlanticSharpnose_Stomach.csv")
+Rarefaction_AtlanticSharpnose_Stomach <- read.csv("Data/ASV_AtlanticSharpnose_Stomach.csv")
 
 View(Rarefaction_AtlanticSharpnose_Stomach)
 
@@ -1799,30 +1411,23 @@ lines(sp2_AtlanticSharpnose,col="darkgreen", ci.type="poly", ci.col=(rgb(0,1,0, 
 #Statistics Comparing the richness and diversity for prey at genus level
 
 #Compare reads between fecal and stomach
-reads<-read.csv("NC_Sharks_Reads_Paired.csv")
+reads<-read.csv("Data/NC_Sharks_Reads_Paired.csv")
 
 t.test(reads, conf.level = 0.95)
 
 #leveneTest compare reads between fecal and stomach
-#install.packages("car")
-library(car)
-SampleType_NumberReads<-read.csv("SampleType_NumberReads.csv")
+SampleType_NumberReads<-read.csv("Data/SampleType_NumberReads.csv")
 leveneTest(Number_of_reads ~ Sample_type, SampleType_NumberReads)
 #If the variances of groups are equal, the p-value should be greater than 0.05
 
 #Calculate richness using only paired, normalized up to genus
-View(NC_Shark_prey_genus_merge_med.norm.paired.ps)
 richness_genus <- estimate_richness(NC_Shark_prey_genus_merge_med.norm.paired.ps, measures=c("Observed", "Shannon", "Simpson"))
-View(richness_genus)
 
 #Replace NC and St numbers with material type manually
 #write.csv(richness_genus, "richness_genus.csv")
-richness_genus<-read.csv("richness_genus.csv")
-View(richness_genus)
+richness_genus<-read.csv("Data/richness_genus.csv")
 
-#Check for normality and variance (code from Salome)
-#install.packages("rstatix")
-library(rstatix)
+#Check for normality and variance
 
 #Shannon (all paired samples)
 richness_genus %>% group_by(material) %>% shapiro_test(Shannon)
@@ -1846,17 +1451,6 @@ t.test(Simpson ~ material, data = richness_genus, paired = TRUE)
 
 #########
 
-#ASV species richness (all paired samples)
-richness_genus %>% group_by(material) %>% shapiro_test(ASVs)
-#p value of less than 0.05 is normal, so these results are considered normal, YAY!
-richness_genus %>% levene_test(ASVs ~ material) #Warning: group coerced to factor -What does this mean? Do I still do a t test?
-#If the variances of groups are equal, the p-value should be greater than 0.05.
-
-#Compare the difference in the detected richness (number of ASVs identified between sample types)
-t.test(ASVs ~ material, data = richness_genus, paired = TRUE)
-
-#########
-
 #Number of genus' species richness (all paired samples)
 richness_genus %>% group_by(material) %>% shapiro_test(genus)
 #p value of less than 0.05 is normal, so these results are considered normal, YAY!
@@ -1871,18 +1465,13 @@ t.test(genus ~ material, data = richness_genus, paired = TRUE)
 #Statistics Comparing the richness and diversity for prey at species level
 
 #Calculate richness using only paired, normalized up to species
-View(NC_Shark_prey_species_merge_med.norm.paired.ps)
 richness_species <- estimate_richness(NC_Shark_prey_species_merge_med.norm.paired.ps, measures=c("Observed", "Shannon", "Simpson"))
-View(richness_species)
 
 #Replace NC and St numbers with material type manually
 #write.csv(richness_species, "richness_species.csv")
-richness_species<-read.csv("richness_species.csv")
-View(richness_species)
+richness_species<-read.csv("Data/richness_species.csv")
 
-#Check for normality and variance (code from Salome)
-#install.packages("rstatix")
-library(rstatix)
+#Check for normality and variance
 
 #Shannon (all paired samples)
 richness_species %>% group_by(material) %>% shapiro_test(Shannon)
