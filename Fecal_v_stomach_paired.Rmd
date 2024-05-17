@@ -1300,8 +1300,9 @@ names(Rarefaction_Bonnethead_Stomach_Reverse)
 
 #Plot all samples together
 #Need to highlight both lines and run them together with command return
-sp1_Bonnethead <- specaccum(Rarefaction_Bonnethead_Fecal_Reverse, object="prey taxa", permutations = 100)
-sp2_Bonnethead <- specaccum(Rarefaction_Bonnethead_Stomach_Reverse, object="prey taxa", permutations = 100)
+#ci=2 means that the CI is 95%
+sp1_Bonnethead <- specaccum(Rarefaction_Bonnethead_Fecal_Reverse, object="prey taxa", permutations = 100, ci=2)
+sp2_Bonnethead <- specaccum(Rarefaction_Bonnethead_Stomach_Reverse, object="prey taxa", permutations = 100, ci=2)
 
 #Need to highlight both lines and run them together with command return
 plot(sp1_Bonnethead, ylab="Number of Prey Taxa", xlab="Number of samples",col="blue",ci.type="poly", ci.col="lightblue", ci.lty = 0,
@@ -1346,8 +1347,9 @@ names(Rarefaction_Blacktip_Stomach_Reverse)
 
 #Plot all samples together
 #Need to highlight both lines and run them together with command return
-sp1_Blacktip <- specaccum(Rarefaction_Blacktip_Fecal_Reverse, object="prey taxa", permutations = 100)
-sp2_Blacktip <- specaccum(Rarefaction_Blacktip_Stomach_Reverse, object="prey taxa", permutations = 100)
+#ci=2 means that the CI is 95%
+sp1_Blacktip <- specaccum(Rarefaction_Blacktip_Fecal_Reverse, object="prey taxa", permutations = 100, ci=2)
+sp2_Blacktip <- specaccum(Rarefaction_Blacktip_Stomach_Reverse, object="prey taxa", permutations = 100, ci=2)
 
 #Need to highlight both lines and run them together with command return
 plot(sp1_Blacktip, ylab="Number of Prey Taxa", xlab="Number of samples",col="blue",ci.type="poly", ci.col="lightblue", ci.lty = 0,
@@ -1392,8 +1394,9 @@ names(Rarefaction_Blacknose_Stomach_Reverse)
 
 #Plot all samples together
 #Need to highlight both lines and run them together with command return
-sp1_Blacknose <- specaccum(Rarefaction_Blacknose_Fecal_Reverse, object="prey taxa", permutations = 100)
-sp2_Blacknose <- specaccum(Rarefaction_Blacknose_Stomach_Reverse, object="prey taxa", permutations = 100)
+#ci=2 means that the CI is 95%
+sp1_Blacknose <- specaccum(Rarefaction_Blacknose_Fecal_Reverse, object="prey taxa", permutations = 100, ci=2)
+sp2_Blacknose <- specaccum(Rarefaction_Blacknose_Stomach_Reverse, object="prey taxa", permutations = 100, ci=2)
 
 #Need to highlight both lines and run them together with command return
 plot(sp1_Blacknose, ylab="Number of Prey Taxa", xlab="Number of samples",col="blue",ci.type="poly", ci.col="lightblue", ci.lty = 0,
@@ -1438,8 +1441,9 @@ names(Rarefaction_AtlanticSharpnose_Stomach_Reverse)
 
 #Plot all samples together
 #Need to highlight both lines and run them together with command return
-sp1_AtlanticSharpnose <- specaccum(Rarefaction_AtlanticSharpnose_Fecal_Reverse, object="prey taxa", permutations = 100)
-sp2_AtlanticSharpnose <- specaccum(Rarefaction_AtlanticSharpnose_Stomach_Reverse, object="prey taxa", permutations = 100)
+#ci=2 means that the CI is 95%
+sp1_AtlanticSharpnose <- specaccum(Rarefaction_AtlanticSharpnose_Fecal_Reverse, object="prey taxa", permutations = 100, ci=2)
+sp2_AtlanticSharpnose <- specaccum(Rarefaction_AtlanticSharpnose_Stomach_Reverse, object="prey taxa", permutations = 100, ci=2)
 
 #Need to highlight both lines and run them together with command return
 plot(sp1_AtlanticSharpnose, ylab="Number of Prey Taxa", xlab="Number of samples",col="blue",ci.type="poly", ci.col="lightblue", ci.lty = 0,
