@@ -1,6 +1,6 @@
 ---
 title: "Chapter 1_to.be.published"
-author: "Savannah"
+author:
 date: "2024-05-15"
 output: html_document
 ---
