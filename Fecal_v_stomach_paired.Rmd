@@ -1522,6 +1522,25 @@ richness_genus %>% levene_test(genus ~ material)
 
 #Compare the difference in the detected richness (number of genus' identified between sample types)
 t.test(genus ~ material, data = richness_genus, paired = TRUE)
+
+
+
+##ANOVA comparing the differences between sample types and shark species
+#Difference between material types manually
+difference_genus<-read.csv("Data/difference_genus.csv")
+View(difference_genus)
+
+#Shannon Diversity
+aov_Shannon.Diff <- aov(Shannon_Diff ~ SharkSpecies, data = difference_genus)
+View(aov_Shannon.Diff)
+
+#Simpson Diversity
+aov_Simpson.Diff <- aov(Simpson_Diff ~ SharkSpecies, data = difference_genus)
+View(aov_Simpson.Diff)
+
+#Richness
+aov_Genus.Diff <- aov(Genus_Diff ~ SharkSpecies, data = difference_genus)
+View(aov_Genus.Diff)
 ```
 
 ```{r}
@@ -1566,4 +1585,23 @@ richness_species %>% levene_test(species ~ material)
 
 #Compare the difference in the detected richness (number of genus' identified between sample types)
 t.test(species ~ material, data = richness_species, paired = TRUE)
+
+
+##ANOVA comparing the differences between sample types and shark species
+#Difference between material types manually
+difference_species<-read.csv("Data/difference_species.csv")
+View(difference_species)
+
+#Shannon Diversity
+aov_Shannon.Diff <- aov(Shannon_Diff ~ SharkSpecies, data = difference_species)
+View(aov_Shannon.Diff)
+
+#Simpson Diversity
+aov_Simpson.Diff <- aov(Simpson_Diff ~ SharkSpecies, data = difference_species)
+View(aov_Simpson.Diff)
+
+#Richness
+aov_Species.Diff <- aov(Species_Diff ~ SharkSpecies, data = difference_species)
+View(aov_Species.Diff)
+
 ```
