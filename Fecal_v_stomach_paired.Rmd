@@ -935,16 +935,15 @@ NC_Shark_prey_species_merge.ps_paired.1 %>%
     suffix_rank = "classified"
   )
 
-top20species_paired <- names(sort(taxa_sums(NC_Shark_prey_species_merge.ps_paired.1), decreasing=TRUE))[0:20]
+species_paired <- names(sort(taxa_sums(NC_Shark_prey_species_merge.ps_paired.1), decreasing=TRUE))[0:22]
 #RRA (OTUs = reads)
-NC_Shark_prey_species_merge.ps_paired.1_top20species <- transform_sample_counts(NC_Shark_prey_species_merge.ps_paired.1, function(OTU) OTU/sum(OTU))
-NC_Shark_prey_species_merge.ps_paired.1_top20species <- prune_taxa(top20species_paired, NC_Shark_prey_species_merge.ps_paired.1_top20species)
+NC_Shark_prey_species_merge.ps_paired.1_RRA <- transform_sample_counts(NC_Shark_prey_species_merge.ps_paired.1, function(OTU) OTU/sum(OTU))
+NC_Shark_prey_species_merge.ps_paired.1_RRA <- prune_taxa(species_paired, NC_Shark_prey_species_merge.ps_paired.1_RRA)
 ```
 
 ```{r}
 ###Final graph that compare fecal vs stomach by individual (species)
-
-plot_bar(NC_Shark_prey_species_merge.ps_paired.1_top20species,x="sample_id", fill="species") + 
+ plot_bar(NC_Shark_prey_species_merge.ps_paired.1_RRA,x="sample_id", fill="species") + 
   facet_grid(~material~Species..scientific.name., scales="free", space = "free") +
   geom_bar(aes(color=species, fill=species), stat="identity", position = position_stack()) +
   theme_classic() +
@@ -952,9 +951,9 @@ plot_bar(NC_Shark_prey_species_merge.ps_paired.1_top20species,x="sample_id", fil
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   ylab("Normalized relative read abundance") +
   scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
-  "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
-  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) 
+  "Rimapenaeus constrictus", "Squilla empusa", "Pinnixulala retinens", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula", "Symphurus plagiusa")) +
+  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue")) +
+  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Clibanarius vittatus"="gold", "Hexapanopeus angustifrons"="palevioletred", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Pomatomus saltatrix"="slateblue1", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue")) 
 ```
 
 ```{r}
@@ -963,18 +962,14 @@ plot_bar(NC_Shark_prey_species_merge.ps_paired.1_top20species,x="sample_id", fil
 #Convert to presence absence:
 NC_Shark_prey_species_merge.ps_paired.1.PA <- phyloseq_standardize_otu_abundance(NC_Shark_prey_species_merge.ps_paired.1, method = "pa")
 
-#Top 20
-top20occ = names(sort(taxa_sums(NC_Shark_prey_species_merge.ps_paired.1.PA), decreasing = TRUE)[1:20])
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20 = prune_taxa(top20occ, NC_Shark_prey_species_merge.ps_paired.1.PA)
-
 ##### ATLANTIC SHARPNOSE #####
 
 #Now only by shark species (Atlantic sharpnose) - this is FOO
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20,Species..scientific.name.=="Rhizoprionodon terraenovae")
+NC_Shark_prey_species_merge.ps_paired.1.PA.AtlanticSharpnose<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1.PA,Species..scientific.name.=="Rhizoprionodon terraenovae")
 
 
 #Put it into dataframes
-otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose)))
+otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.AtlanticSharpnose)))
 otu_df$otu<-rownames(otu_df)
 
 otu_df_long<-otu_df%>%
@@ -985,12 +980,12 @@ otu_df_long$sample <-gsub(pattern = ".",
                           x=otu_df_long$sample,
                           fixed = TRUE)
 
-sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose)))
+sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.AtlanticSharpnose)))
 sample_df<-rownames_to_column(sample_df, var = "sample")
 sample_material_key<-sample_df%>%
   select(sample,material)
 
-taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose)))
+taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.AtlanticSharpnose)))
 taxa_df<-rownames_to_column(taxa_df,var="otu")
 otu_species_key<-taxa_df%>%
   select(otu,family,genus,species)
@@ -1013,28 +1008,28 @@ merge_material_counts<-merge_material_otu_counts%>%
   mutate(rel_prct=(total_count/total_material)*100)
 
 #plot 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose_plot <- ggplot(merge_material_counts,fill="species") +
+NC_Shark_prey_species_merge.ps_paired.1.PA.AtlanticSharpnose_plot <- ggplot(merge_material_counts,fill="species") +
   geom_bar(aes(x=material, y=rel_prct, color=species, fill=species),stat="identity", position="stack")+
   ylab("Relative Percent of Occurrence by material type") + 
   xlab("Atlantic sharpnose") +
   theme_classic() + theme(text = element_text(size =11)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
-  "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
-  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1"))
+  "Rimapenaeus constrictus", "Squilla empusa", "Pinnixulala retinens", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula", "Symphurus plagiusa")) +
+  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue")) +
+  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue"))
 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose_plot
+NC_Shark_prey_species_merge.ps_paired.1.PA.AtlanticSharpnose_plot
 
 ########################################################################################################################
 
 ##### BONNETHEAD ######
 
 #Now only by shark species (Bonnethead) - this is FOO
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Bonnethead<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20,Species..scientific.name.=="Sphyrna tiburo")
+NC_Shark_prey_species_merge.ps_paired.1.PA.Bonnethead<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1,Species..scientific.name.=="Sphyrna tiburo")
 
 #Put it into dataframes
-otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Bonnethead)))
+otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Bonnethead)))
 otu_df$otu<-rownames(otu_df)
 
 otu_df_long<-otu_df%>%
@@ -1045,13 +1040,13 @@ otu_df_long$sample <-gsub(pattern = ".",
                           x=otu_df_long$sample,
                           fixed = TRUE)
 
-sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Bonnethead)))
+sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Bonnethead)))
 sample_df<-rownames_to_column(sample_df, var = "sample")
 
 sample_material_key<-sample_df%>%
   select(sample,material)
 
-taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Bonnethead)))
+taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Bonnethead)))
 taxa_df<-rownames_to_column(taxa_df,var="otu")
 otu_species_key<-taxa_df%>%
   select(otu,family,genus,species)
@@ -1074,28 +1069,30 @@ merge_material_counts<-merge_material_otu_counts%>%
   mutate(rel_prct=(total_count/total_material)*100)
 
 #plot 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Bonnethead_plot <- ggplot(merge_material_counts,fill="species")+
+NC_Shark_prey_species_merge.ps_paired.1.PA.Bonnethead_plot <- ggplot(merge_material_counts,fill="species")+
   geom_bar(aes(x=material, y=rel_prct, color=species, fill=species), stat="identity", position="stack")+
   ylab("Relative Percent of Occurrence by material type") + 
   xlab("Bonnethead") + 
   theme_classic() + theme(text = element_text(size =11)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
-  "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
-  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1"))
+  "Rimapenaeus constrictus", "Squilla empusa", "Pinnixulala retinens", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula", "Symphurus plagiusa")) +
+  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue")) +
+  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue"))
 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Bonnethead_plot
+NC_Shark_prey_species_merge.ps_paired.1.PA.Bonnethead_plot
 
 ########################################################################################################################
 
 ##### BLACKNOSE ######
 
+NC_Shark_prey_species_merge.ps_paired.1.PA <- phyloseq_standardize_otu_abundance(NC_Shark_prey_species_merge.ps_paired.1, method = "pa")
+
 #Now only by shark species (Blacknose) - this is FOO
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacknose<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20,Species..scientific.name.=="Carcharhinus acronotus")
+NC_Shark_prey_species_merge.ps_paired.1.PA.Blacknose<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1.PA,Species..scientific.name.=="Carcharhinus acronotus")
 
 #Put it into dataframes
-otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacknose)))
+otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Blacknose)))
 otu_df$otu<-rownames(otu_df)
 
 otu_df_long<-otu_df%>%
@@ -1106,13 +1103,13 @@ otu_df_long$sample <-gsub(pattern = ".",
                           x=otu_df_long$sample,
                           fixed = TRUE)
 
-sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacknose)))
+sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Blacknose)))
 sample_df<-rownames_to_column(sample_df, var = "sample")
 
 sample_material_key<-sample_df%>%
   select(sample,material)
 
-taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacknose)))
+taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Blacknose)))
 taxa_df<-rownames_to_column(taxa_df,var="otu")
 otu_species_key<-taxa_df%>%
   select(otu,family,genus,species)
@@ -1135,28 +1132,30 @@ merge_material_counts<-merge_material_otu_counts%>%
   mutate(rel_prct=(total_count/total_material)*100)
 
 #plot 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacknose_plot <- ggplot(merge_material_counts,fill="species")+
+NC_Shark_prey_species_merge.ps_paired.1.PA.Blacknose_plot <- ggplot(merge_material_counts,fill="species")+
   geom_bar(aes(x=material, y=rel_prct, color=species, fill=species), stat="identity", position="stack")+
   ylab("Relative Percent of Occurrence by material type") + 
   xlab("Blacknose") + 
   theme_classic() + theme(text = element_text(size =11)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
-  "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
-  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1"))
+  "Rimapenaeus constrictus", "Squilla empusa", "Pinnixulala retinens", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula", "Symphurus plagiusa")) +
+  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue")) +
+  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue"))
 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacknose_plot
+NC_Shark_prey_species_merge.ps_paired.1.PA.Blacknose_plot
 
 ########################################################################################################################
 
 ##### BLACKTIP ######
 
+NC_Shark_prey_species_merge.ps_paired.1.PA <- phyloseq_standardize_otu_abundance(NC_Shark_prey_species_merge.ps_paired.1, method = "pa")
+
 #Now only by shark species (Blacktip) - this is FOO
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacktip<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20,Species..scientific.name.=="Carcharhinus limbatus")
+NC_Shark_prey_species_merge.ps_paired.1.PA.Blacktip<-subset_samples(NC_Shark_prey_species_merge.ps_paired.1.PA,Species..scientific.name.=="Carcharhinus limbatus")
 
 #Put it into dataframes
-otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacktip)))
+otu_df<-cbind(data.frame(otu_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Blacktip)))
 otu_df$otu<-rownames(otu_df)
 
 otu_df_long<-otu_df%>%
@@ -1167,13 +1166,14 @@ otu_df_long$sample <-gsub(pattern = ".",
                           x=otu_df_long$sample,
                           fixed = TRUE)
 
-sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacktip)))
+sample_df<-cbind(data.frame(sample_data(NC_Shark_prey_species_merge.ps_paired.1.PA.Blacktip)))
 sample_df<-rownames_to_column(sample_df, var = "sample")
+
 
 sample_material_key<-sample_df%>%
   select(sample,material)
 
-taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacktip)))
+taxa_df<-cbind(data.frame(tax_table(NC_Shark_prey_species_merge.ps_paired.1.PA.Blacktip)))
 taxa_df<-rownames_to_column(taxa_df,var="otu")
 otu_species_key<-taxa_df%>%
   select(otu,family,genus,species)
@@ -1196,24 +1196,24 @@ merge_material_counts<-merge_material_otu_counts%>%
   mutate(rel_prct=(total_count/total_material)*100)
 
 #plot 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacktip_plot <- ggplot(merge_material_counts,fill="species")+
+NC_Shark_prey_species_merge.ps_paired.1.PA.Blacktip_plot <- ggplot(merge_material_counts,fill="species")+
   geom_bar(aes(x=material, y=rel_prct, color=species, fill=species), stat="identity", position="stack")+
   ylab("Relative Percent of Occurrence by material type") + 
   xlab("Blacktip") + 
   theme_classic() + theme(text = element_text(size =11)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_discrete(limits = c("Achelous gibbesii", "Achelous spinimanus", "Arenaeus cribrarius", "Callinectes sapidus", "Callinectes similis", "Clibanarius vittatus", "Hexapanopeus angustifrons", "Ovalipes ocellatus", "Penaeus setiferus", 
-  "Rimapenaeus constrictus", "Squilla empusa", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula")) +
-  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1")) +
-  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1"))
+  "Rimapenaeus constrictus", "Squilla empusa", "Pinnixulala retinens", "Cynoscion nothus", "Cynoscion regalis", "Lagodon rhomboides", "Leiostomus xanthurus", "Myrophis punctatus", "Pomatomus saltatrix", "Synodus foetens", "Trichiurus lepturus", "Xyrichtys novacula", "Symphurus plagiusa")) +
+  scale_fill_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue")) +
+  scale_color_manual(values = c("Achelous gibbesii"="darkorange", "Achelous spinimanus"="darkorange4", "Arenaeus cribrarius"="darksalmon", "Callinectes sapidus"="goldenrod3", "Callinectes similis"="tomato", "Cynoscion nothus"="aquamarine4", "Cynoscion regalis"="darkolivegreen", "Hexapanopeus angustifrons"="palevioletred", "Lagodon rhomboides"="lightseagreen", "Leiostomus xanthurus"="palegreen", "Myrophis punctatus"="royalblue", "Ovalipes ocellatus"="yellow", "Penaeus setiferus"="red", "Pomatomus saltatrix"="slateblue1", "Rimapenaeus constrictus"="violetred", "Squilla empusa"="hotpink1", "Pinnixulala retinens"= "darkred", "Symphurus plagiusa"="slategray2", "Synodus foetens"="navyblue", "Trichiurus lepturus"="yellowgreen", "Xyrichtys novacula"="darkolivegreen1", "Symphurus plagiusa"="lightblue"))
 
-NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacktip_plot
+NC_Shark_prey_species_merge.ps_paired.1.PA.Blacktip_plot
 
 #########################################################################################
 
 #Plot all together
 library(gridExtra)
-grid.arrange(NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacktip_plot, NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Blacknose_plot, NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.Bonnethead_plot, NC_Shark_prey_species_merge.ps_paired.1.PA.Top20.AtlanticSharpnose_plot, ncol=2)
+grid.arrange(NC_Shark_prey_species_merge.ps_paired.1.PA.Blacktip_plot, NC_Shark_prey_species_merge.ps_paired.1.PA.Blacknose_plot, NC_Shark_prey_species_merge.ps_paired.1.PA.Bonnethead_plot, NC_Shark_prey_species_merge.ps_paired.1.PA.AtlanticSharpnose_plot, ncol=2)
 ```
 
 ```{r}
@@ -1532,15 +1532,18 @@ View(difference_genus)
 
 #Shannon Diversity
 aov_Shannon.Diff <- aov(Shannon_Diff ~ SharkSpecies, data = difference_genus)
-View(aov_Shannon.Diff)
+summary(aov_Shannon.Diff)
+TukeyHSD(aov_Shannon.Diff)
 
 #Simpson Diversity
 aov_Simpson.Diff <- aov(Simpson_Diff ~ SharkSpecies, data = difference_genus)
-View(aov_Simpson.Diff)
+summary(aov_Simpson.Diff)
+TukeyHSD(aov_Simpson.Diff)
 
 #Richness
 aov_Genus.Diff <- aov(Genus_Diff ~ SharkSpecies, data = difference_genus)
-View(aov_Genus.Diff)
+summary(aov_Genus.Diff)
+TukeyHSD(aov_Genus.Diff)
 ```
 
 ```{r}
@@ -1594,14 +1597,16 @@ View(difference_species)
 
 #Shannon Diversity
 aov_Shannon.Diff <- aov(Shannon_Diff ~ SharkSpecies, data = difference_species)
-View(aov_Shannon.Diff)
+summary(aov_Shannon.Diff)
+TukeyHSD(aov_Shannon.Diff)
 
 #Simpson Diversity
 aov_Simpson.Diff <- aov(Simpson_Diff ~ SharkSpecies, data = difference_species)
-View(aov_Simpson.Diff)
+summary(aov_Simpson.Diff)
+TukeyHSD(aov_Simpson.Diff)
 
 #Richness
 aov_Species.Diff <- aov(Species_Diff ~ SharkSpecies, data = difference_species)
-View(aov_Species.Diff)
-
+summary(aov_Species.Diff)
+TukeyHSD(aov_Species.Diff)
 ```
