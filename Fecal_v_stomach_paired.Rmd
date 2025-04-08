@@ -1248,6 +1248,60 @@ pseq_paired %>%
   ggplot2::stat_ellipse(
     ggplot2::aes(colour = Species..scientific.name.)
   )
+
+pseq_paired %>%
+  tax_transform(rank = "genus", trans = "compositional") %>%
+  dist_calc(dist = "jsd") %>%
+  ord_calc(method = "NMDS") %>%
+  ord_plot(
+    axes = c(1, 2),
+    colour = "Species..scientific.name.",
+    fill = "Species..scientific.name.",
+    shape = "material",
+    alpha = 0.5,
+    size = 2
+  ) +
+  geom_line(aes(x = NMDS1, y = NMDS2, group = sample_id, colour = Species..scientific.name.)) +
+  theme(
+    panel.grid = element_blank(),
+    panel.grid.major = element_blank()
+  ) +
+  ggplot2::stat_ellipse(
+    ggplot2::aes(
+      colour = Species..scientific.name., 
+      group = interaction(Species..scientific.name., material) # Ensures separate ellipses
+    )
+  )
+
+
+pseq_paired %>%
+  tax_transform(rank = "genus", trans = "compositional") %>%
+  dist_calc(dist = "jsd") %>%
+  ord_calc(method = "NMDS") %>%
+  ord_plot(
+    axes = c(1, 2),
+    colour = "material",  # Color points by material type
+    fill = "material",
+    shape = "material",
+    alpha = 0.5,
+    size = 2
+  ) +
+  geom_line(aes(x = NMDS1, y = NMDS2, group = sample_id), colour = "grey") +  # Black connecting lines
+  ggplot2::stat_ellipse(
+    ggplot2::aes(
+      colour = material, 
+      group = interaction(Species..scientific.name., material) # Separate ellipses for species & material
+    )
+  ) +
+  facet_wrap(~Species..scientific.name.) +  # Separate plots per species
+  scale_color_manual(values = c("fecal" = "skyblue", "stomach" = "orange")) +  # Custom colors
+  scale_fill_manual(values = c("fecal" = "skyblue", "stomach" = "orange")) +   # Custom fill colors
+  theme(
+    panel.grid = element_blank(),
+    panel.grid.major = element_blank()
+  )
+
+
 ```
 
 ```{r}
